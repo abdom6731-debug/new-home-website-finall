@@ -854,6 +854,30 @@ header.hid{transform:translateY(-110%)}
   html{scroll-behavior:auto}
 }
 </style>
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2289778918426450');
+fbq('track', 'PageView');
+
+window.trackMetaEvent = function(name, params) {
+  if (typeof window.fbq === 'function') {
+    window.fbq('track', name, params || {});
+  }
+};
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2289778918426450&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 </head>
 <body>
 <div class="prog"><i id="progBar"></i></div>
@@ -1650,7 +1674,8 @@ const contactThanks=document.getElementById('thanks');
 const contactPhoneField=contactForm.querySelector('input[type="tel"]');
 /* Clear a previous custom error as soon as the customer corrects the number. */
 contactPhoneField.addEventListener('input',()=>contactPhoneField.setCustomValidity(''));
-contactForm.addEventListener('submit',async event=>{
+contactForm.addEventListener('submit',
+  trackMetaEvent('Lead', {lead_source:'website_contact_form'});async event=>{
   trackMetaEvent('Lead', {lead_source: 'website_contact_form'});
   event.preventDefault();
   const nameInput=contactForm.querySelector('input[type="text"]');
@@ -1790,6 +1815,18 @@ initSnap(document.querySelector('.pkg-grid'),document.getElementById('pkgDots'))
 document.addEventListener('click', function (event) {
   const link = event.target.closest && event.target.closest('a[href*="wa.me/"], a[href*="whatsapp"]');
   if (link) trackMetaEvent('Contact', {contact_method: 'whatsapp'});
+});
+</script>
+
+
+<script>
+document.addEventListener('click', function(e) {
+  var link = e.target.closest && e.target.closest('a[href]');
+  if (!link) return;
+  var href = link.href || '';
+  if (/wa\.me\/|api\.whatsapp\.com\/|whatsapp/i.test(href)) {
+    trackMetaEvent('Contact', {contact_method:'whatsapp'});
+  }
 });
 </script>
 
