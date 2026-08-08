@@ -1,24 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<!-- Meta Pixel Code -->
-<script>
-!function(f,b,e,v,n,t,s)
-{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '2289778918426450');
-fbq('track', 'PageView');
-</script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=2289778918426450&ev=PageView&noscript=1"
-/></noscript>
-<!-- End Meta Pixel Code -->
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>New Home — قبل ما تبدأ التشطيب، ابدأ بتصميم صح</title>
@@ -1669,6 +1651,7 @@ const contactPhoneField=contactForm.querySelector('input[type="tel"]');
 /* Clear a previous custom error as soon as the customer corrects the number. */
 contactPhoneField.addEventListener('input',()=>contactPhoneField.setCustomValidity(''));
 contactForm.addEventListener('submit',async event=>{
+  trackMetaEvent('Lead', {lead_source: 'website_contact_form'});
   event.preventDefault();
   const nameInput=contactForm.querySelector('input[type="text"]');
   const phoneInput=contactForm.querySelector('input[type="tel"]');
@@ -1707,6 +1690,7 @@ contactForm.addEventListener('submit',async event=>{
   contactThanks.style.display='block';
   const whatsappUrl=`https://wa.me/201009796035?text=${encodeURIComponent(message)}`;
   setTimeout(()=>{
+    trackMetaEvent('Contact', {contact_method: 'whatsapp'});
     window.location.assign(whatsappUrl);
   },1300);
   button.disabled=false;
@@ -1721,7 +1705,9 @@ document.getElementById('ctaX').addEventListener('click',closeCta);
 document.getElementById('ctaSend').addEventListener('click',()=>{
   const n=document.getElementById('ctaName').value.trim(),ph=document.getElementById('ctaPhone').value.trim();
   if(!n||!ph)return;
+  trackMetaEvent('Lead', {lead_source: 'floating_callback_form'});
   const miniMessage=`أهلًا، أريد طلب اتصال من New Home.\n\nالاسم: ${n}\nرقم الموبايل: ${ph}`;
+  trackMetaEvent('Contact', {contact_method: 'whatsapp'});
   window.open(`https://wa.me/201009796035?text=${encodeURIComponent(miniMessage)}`,'_blank','noopener');
   document.getElementById('ctaDone').style.display='block';
   document.getElementById('ctaName').value='';document.getElementById('ctaPhone').value='';
@@ -1798,5 +1784,14 @@ function initSnap(grid,dots){
 initSnap(document.querySelector('.pkg-grid'),document.getElementById('pkgDots'));
 
 </script>
+
+<script>
+/* Track WhatsApp CTA clicks as Meta Contact events */
+document.addEventListener('click', function (event) {
+  const link = event.target.closest && event.target.closest('a[href*="wa.me/"], a[href*="whatsapp"]');
+  if (link) trackMetaEvent('Contact', {contact_method: 'whatsapp'});
+});
+</script>
+
 </body>
 </html>
