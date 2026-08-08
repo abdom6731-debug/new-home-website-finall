@@ -95,7 +95,7 @@ button{font-family:var(--ar)}
 header{position:fixed;inset:0 0 auto 0;z-index:100;transition:all .5s var(--ease);padding:20px 0}
 header .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .logo{font-family:var(--lat);font-size:21px;font-weight:500;color:#fff;letter-spacing:.02em;transition:color .4s;display:flex;align-items:center;gap:13px}
-.logo .mark{height:42px;width:auto;display:block}.logo .mark-light{mix-blend-mode:screen}
+.logo .mark{height:42px;width:auto;display:block}
 .logo .mark-dark{display:none}
 header.scrolled .mark-light{display:none}
 header.scrolled .mark-dark{display:block}
@@ -778,14 +778,26 @@ header.hid{transform:translateY(-110%)}
 #tours360{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:20px!important;columns:auto!important;overflow:visible!important;padding:0!important}
 #tours360 .tile{width:auto!important;min-width:0!important;height:280px!important;margin:0!important}
 #tours360 .tile .ph{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
-@media(max-width:1000px){#tours360{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:700px){
-  #tours360{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important}
-  #tours360 .tile{height:220px!important}
+@media(max-width:1000px){
+  #tours360{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
 }
-@media(max-width:402px){
-  #tours360{gap:16px!important}
-  #tours360 .tile{height:195px!important}
+@media(max-width:700px){
+  #tours360{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+    row-gap:14px!important;
+    align-items:stretch!important;
+  }
+  #tours360 .tile{
+    width:100%!important;
+    height:300px!important;
+    margin:0!important;
+    min-width:0!important;
+  }
+}
+@media(max-width:440px){
+  #tours360{gap:12px!important;row-gap:12px!important}
+  #tours360 .tile{height:280px!important}
 }
 
 /* ============ DEVICE FIT LAYER ============ */
@@ -1103,6 +1115,28 @@ header.hid{transform:translateY(-110%)}
   </div>
 </section>
 
+<!-- ============ JOURNEY ============ -->
+<section class="section journey" id="process">
+  <div class="wrap">
+    <div class="eyebrow reveal">THE JOURNEY</div>
+    <h2 class="h-display reveal d1" style="margin-top:20px">رحلتك معنا <strong>خطوة بخطوة</strong></h2>
+    <p class="lead reveal d2" style="margin-top:14px">من أول استشارة وحتى استلام مشروعك... تعرف على كل مرحلة من رحلتك معنا.</p>
+
+    <div class="jtrack-wrap reveal d2">
+      <div class="jtrack" id="jtrack">
+        <span class="jline"></span><span class="jfill" id="jfill"></span>
+      </div>
+    </div>
+
+    <div class="jcard reveal d3" id="jcard">
+      <div class="jmedia" id="jmedia"></div>
+      <div class="jbody" id="jbody"></div>
+    </div>
+  </div>
+</section>
+
+
+
 <!-- ============ 3D EXPERIENCE ============ -->
 <!-- 3D experience section removed by request.
 <section class="section threed" id="threed">
@@ -1130,26 +1164,6 @@ header.hid{transform:translateY(-110%)}
   </div>
 </section>
 -->
-
-<!-- ============ JOURNEY ============ -->
-<section class="section journey" id="process">
-  <div class="wrap">
-    <div class="eyebrow reveal">THE JOURNEY</div>
-    <h2 class="h-display reveal d1" style="margin-top:20px">رحلتك معنا <strong>خطوة بخطوة</strong></h2>
-    <p class="lead reveal d2" style="margin-top:14px">من أول استشارة وحتى استلام مشروعك... تعرف على كل مرحلة من رحلتك معنا.</p>
-
-    <div class="jtrack-wrap reveal d2">
-      <div class="jtrack" id="jtrack">
-        <span class="jline"></span><span class="jfill" id="jfill"></span>
-      </div>
-    </div>
-
-    <div class="jcard reveal d3" id="jcard">
-      <div class="jmedia" id="jmedia"></div>
-      <div class="jbody" id="jbody"></div>
-    </div>
-  </div>
-</section>
 
 <!-- ============ TESTIMONIALS ============ -->
 <section class="section" id="testimonials">
