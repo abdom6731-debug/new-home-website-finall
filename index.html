@@ -95,7 +95,7 @@ button{font-family:var(--ar)}
 header{position:fixed;inset:0 0 auto 0;z-index:100;transition:all .5s var(--ease);padding:20px 0}
 header .wrap{display:flex;align-items:center;justify-content:space-between;gap:24px}
 .logo{font-family:var(--lat);font-size:21px;font-weight:500;color:#fff;letter-spacing:.02em;transition:color .4s;display:flex;align-items:center;gap:13px}
-.logo .mark{height:42px;width:auto;display:block}
+.logo .mark{height:42px;width:auto;display:block}.logo .mark-light{mix-blend-mode:screen}
 .logo .mark-dark{display:none}
 header.scrolled .mark-light{display:none}
 header.scrolled .mark-dark{display:block}
@@ -779,7 +779,14 @@ header.hid{transform:translateY(-110%)}
 #tours360 .tile{width:auto!important;min-width:0!important;height:280px!important;margin:0!important}
 #tours360 .tile .ph{display:block!important;width:100%!important;height:100%!important;object-fit:cover!important}
 @media(max-width:1000px){#tours360{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-@media(max-width:700px){#tours360{grid-template-columns:1fr!important}#tours360 .tile{height:300px!important}}
+@media(max-width:700px){
+  #tours360{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}
+  #tours360 .tile{height:220px!important}
+}
+@media(max-width:402px){
+  #tours360{gap:10px!important}
+  #tours360 .tile{height:195px!important}
+}
 
 /* ============ DEVICE FIT LAYER ============ */
 /* iPhone notch / Dynamic Island + home indicator safe areas */
