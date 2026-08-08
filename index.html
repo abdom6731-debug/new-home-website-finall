@@ -1711,11 +1711,6 @@ contactForm.addEventListener('submit',async event=>{
   }
   contactForm.style.display='none';
   contactThanks.style.display='block';
-  const whatsappUrl=`https://wa.me/201009796035?text=${encodeURIComponent(message)}`;
-  setTimeout(()=>{
-    trackMetaEvent('Contact', {contact_method: 'whatsapp'});
-    window.location.assign(whatsappUrl);
-  },1300);
   button.disabled=false;
   button.innerHTML=oldButton;
 });
