@@ -17,11 +17,21 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '2289778918426450');
 fbq('track', 'PageView');
+window._metaEventQueue = window._metaEventQueue || [];
 window.trackMetaEvent = function(eventName, params) {
+  const event = {eventName, params: params || {}};
   if (typeof window.fbq === 'function') {
-    window.fbq('track', eventName, params || {});
+    window.fbq('track', event.eventName, event.params);
+  } else {
+    window._metaEventQueue.push(event);
   }
 };
+window._flushMetaEventQueue = function() {
+  if (typeof window.fbq !== 'function' || !window._metaEventQueue) return;
+  const queue = window._metaEventQueue.splice(0);
+  queue.forEach(event => window.fbq('track', event.eventName, event.params));
+};
+window._flushMetaEventQueue();
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=2289778918426450&ev=PageView&noscript=1" /></noscript>
@@ -1695,25 +1705,29 @@ const contactPhoneField=contactForm.querySelector('input[type="tel"]');
 /* Clear a previous custom error as soon as the customer corrects the number. */
 contactPhoneField.addEventListener('input',()=>contactPhoneField.setCustomValidity(''));
 contactForm.addEventListener('submit',async event=>{
-  trackMetaEvent('Lead', {lead_source: 'website_contact_form'});
   event.preventDefault();
+
   const nameInput=contactForm.querySelector('input[type="text"]');
   const phoneInput=contactForm.querySelector('input[type="tel"]');
   const cleanPhone=phoneInput.value.replace(/[\s()-]/g,'');
   phoneInput.setCustomValidity(/^\+?\d{10,15}$/.test(cleanPhone)?'':'اكتب رقم موبايل صحيح');
+
   if(!contactForm.checkValidity()){
     contactForm.reportValidity();
     return;
   }
+
   const selects=contactForm.querySelectorAll('select');
   const details=contactForm.querySelector('textarea').value.trim()||'لم تُضف تفاصيل إضافية';
   const message=`طلب استشارة جديد من موقع New Home\n\nالاسم: ${nameInput.value.trim()}\nرقم الموبايل: ${phoneInput.value.trim()}\nنوع الوحدة: ${selects[0].value}\nالباقة المطلوبة: ${selects[1].value}\nتفاصيل المشروع: ${details}`;
+
   const button=contactForm.querySelector('button[type="submit"]');
   const oldButton=button.innerHTML;
   button.disabled=true;
-  button.textContent='جارٍ تجهيز طلبك...';
+  button.textContent='جارٍ إرسال طلبك...';
+
   try{
-    fetch('https://formsubmit.co/ajax/abdox6731@gmail.com',{
+    const response=await fetch('https://formsubmit.co/ajax/abdox6731@gmail.com',{
       method:'POST',
       headers:{'Content-Type':'application/json',Accept:'application/json'},
       body:JSON.stringify({
@@ -1725,13 +1739,26 @@ contactForm.addEventListener('submit',async event=>{
         message,
         _subject:'New Home | طلب استشارة جديد',
         _template:'table'
-      })
-    }).catch(error=>console.warn('Email copy could not be sent.',error));
+      }),
+      cache:'no-store',
+      credentials:'omit'
+    });
+
+    if(!response.ok){
+      throw new Error('FormSubmit HTTP '+response.status);
+    }
+
+    trackMetaEvent('Lead', {lead_source:'website_contact_form'});
+    contactForm.style.display='none';
+    contactThanks.style.display='block';
   }catch(error){
-    console.warn('Email copy could not be sent.',error);
+    console.warn('Email could not be sent.',error);
+    alert('حصلت مشكلة في إرسال الطلب. تأكد من اتصال الإنترنت وحاول مرة تانية.');
+    button.disabled=false;
+    button.innerHTML=oldButton;
+    return;
   }
-  contactForm.style.display='none';
-  contactThanks.style.display='block';
+
   button.disabled=false;
   button.innerHTML=oldButton;
 });
@@ -1828,7 +1855,17 @@ initSnap(document.querySelector('.pkg-grid'),document.getElementById('pkgDots'))
 /* Track WhatsApp CTA clicks as Meta Contact events */
 document.addEventListener('click', function (event) {
   const link = event.target.closest && event.target.closest('a[href*="wa.me/"], a[href*="whatsapp"]');
-  if (link) trackMetaEvent('Contact', {contact_method: 'whatsapp'});
+  if (!link) return;
+
+  trackMetaEvent('Contact', {contact_method: 'whatsapp'});
+
+  // Give Meta a brief moment to send the browser event before mobile navigation.
+  if (!link.dataset.metaTracked) {
+    link.dataset.metaTracked = '1';
+    const href = link.href;
+    event.preventDefault();
+    setTimeout(function(){ window.location.href = href; }, 180);
+  }
 });
 </script>
 
