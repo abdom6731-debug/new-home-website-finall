@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>New Home — قبل ما تبدأ التشطيب، ابدأ بتصميم صح</title>
-<meta name="description" content="New Home — استوديو تصميم داخلي ومعماري في مصر. باقات 2D و3D وVR تبدأ من 5,000 جنيه. صمم بيتك صح قبل التنفيذ.">
+<meta name="description" content="New Home — استوديو تصميم داخلي ومعماري في مصر. باقات 2D و3D وVR لتصميم بيتك صح قبل التنفيذ.">
 <!-- Meta Pixel Code -->
 <script>
 !function(f,b,e,v,n,t,s)
@@ -1001,7 +1001,7 @@ header.hid{transform:translateY(-110%)}
       <div class="price-card reveal" data-pkg="p2d">
         <span class="pkg-ico">📐</span>
         <div class="pkg">2D Architectural</div>
-        <div class="price"><span class="from">يبدأ من</span><b>5,000</b><span>ج.م</span></div>
+        
         <div class="price-note">المخططات الهندسية الكاملة لمشروعك — أساس أي تنفيذ سليم.</div>
         <div class="feats">
           <div class="feat ok f1"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 12l5 5 11-11"/></svg></span>المخططات التنفيذية</div>
@@ -1020,7 +1020,7 @@ header.hid{transform:translateY(-110%)}
         <span class="badge">⭐ الأكثر طلبًا</span>
         <span class="pkg-ico">🎬</span>
         <div class="pkg">3D Design</div>
-        <div class="price"><span class="from">يبدأ من</span><b>15,000</b><span>ج.م</span></div>
+        
         <div class="price-note">شوف بيتك برندرات واقعية وجرّب الألوان والخامات قبل الشراء.</div>
         <div class="feats">
           <div class="feat ok f1"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 12l5 5 11-11"/></svg></span>المخططات التنفيذية</div>
@@ -1039,7 +1039,7 @@ header.hid{transform:translateY(-110%)}
         <span class="badge badge-vr">🥽 التجربة الكاملة</span>
         <span class="pkg-ico">🥽</span>
         <div class="pkg">VR Experience</div>
-        <div class="price"><span class="from">يبدأ من</span><b>18,000</b><span>ج.م</span></div>
+        
         <div class="price-note">جولة داخل المشروع باستخدام نظارة VR، لتعيش التجربة وكأنك داخل منزلك قبل بدء التنفيذ.</div>
         <div class="feats">
           <div class="feat ok f1"><span class="fi"><svg viewBox="0 0 24 24"><path d="M4 12l5 5 11-11"/></svg></span>المخططات التنفيذية</div>
@@ -1434,11 +1434,11 @@ document.querySelectorAll('.q button').forEach(btn=>btn.addEventListener('click'
 
 /* ===== package details drawer ===== */
 const PKGS={
- p2d:{name:'2D Architectural Package',ico:'📐',price:'يبدأ من 5,000',dur:'7–14 يوم عمل',rev:'جولتا تعديل',files:'PDF + DWG (أوتوكاد)',
+ p2d:{name:'2D Architectural Package',ico:'📐',dur:'7–14 يوم عمل',rev:'جولتا تعديل',files:'PDF + DWG (أوتوكاد)',
   inc:['زيارة الموقع ورفع المقاسات','المخطط الأفقي وتوزيع الفرش','مخطط الكهرباء والإضاءة','مخطط السباكة والتغذية','مخطط التكييف HVAC','تقرير ملاحظات الموقع']},
- p3d:{name:'3D Design Package',ico:'🎬',price:'يبدأ من 15,000',dur:'15–25 يوم عمل',rev:'3 جولات تعديل',files:'كل ملفات 2D + رندرات عالية الجودة + قائمة خامات',
+ p3d:{name:'3D Design Package',ico:'🎬',dur:'15–25 يوم عمل',rev:'3 جولات تعديل',files:'كل ملفات 2D + رندرات عالية الجودة + قائمة خامات',
   inc:['كل بنود باقة 2D بالكامل','تصميم 3D واقعي لجميع الفراغات','تجربة بدائل الألوان والخامات','رندرات عالية الجودة لكل غرفة','جولة 360° داخل المشروع','قائمة الخامات والتشطيبات للتنفيذ','اعتماد نهائي قبل التنفيذ']},
- pvr:{name:'VR Experience Package',ico:'🥽',price:'يبدأ من 18,000',dur:'20–30 يوم عمل',rev:'3 جولات + جولة VR للاعتماد',files:'كل ملفات 3D + ملف الجولة الافتراضية',
+ pvr:{name:'VR Experience Package',ico:'🥽',dur:'20–30 يوم عمل',rev:'3 جولات + جولة VR للاعتماد',files:'كل ملفات 3D + ملف الجولة الافتراضية',
   inc:['جميع مميزات باقة 3D','رؤية المشروع بالكامل قبل التنفيذ','جولة داخل المشروع بنظارة VR','استكشاف جميع الغرف بالحجم الحقيقي','تجربة الخامات والإضاءة بشكل واقعي','تعديل أي عنصر قبل التنفيذ']}
 };
 const drawer=document.getElementById('drawer'),drawerIn=document.getElementById('drawerIn'),veil=document.getElementById('drawerVeil');
@@ -1447,7 +1447,7 @@ function openPkg(id){
   drawerIn.innerHTML=`<button class="dx" id="dClose">✕</button>
     <div style="font-size:38px;margin-bottom:8px">${p.ico}</div>
     <div class="pkg">${p.name}</div>
-    <div class="dprice">${p.price} <small>جنيه مصري</small></div>
+    
     <div class="dmeta">
       <div class="dm"><b>مدة التنفيذ</b><span>${p.dur}</span></div>
       <div class="dm"><b>جولات التعديل</b><span>${p.rev}</span></div>
