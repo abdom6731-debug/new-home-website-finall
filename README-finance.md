@@ -1,6 +1,6 @@
 # New Home Financial System
 
-The public website remains at `/`. The protected application is at `/staff/`; its API is served by the Worker at `/api/`.
+The public website remains at `/`. The protected application is at `/staff/`; its API is served at `/api/` through a Cloudflare Pages Function, on the same domain as the site.
 
 ## Provisioning
 
@@ -8,7 +8,7 @@ The public website remains at `/`. The protected application is at `/staff/`; it
 2. Create resources: `npx wrangler d1 create new-home-finance` and `npx wrangler r2 bucket create new-home-receipts`.
 3. Put the returned D1 ID in `wrangler.toml`, copy `.dev.vars.example` to `.dev.vars`, and set strong unique secrets.
 4. Apply schema: `npm install`, then `npm run db:migrate`.
-5. Deploy the Worker and serve the static files (including `staff/`) through Cloudflare Pages with `/api/*` routed to this Worker, or deploy the Worker as the same-origin application gateway.
+5. In Cloudflare Pages, connect the GitHub repository and use **no build command** and output directory `.`. Pages automatically deploys the static site and the `functions/api/[[path]].js` API adapter. Add the D1/R2 bindings and secrets to the Pages project under **Settings → Bindings / Variables and Secrets**.
 
 The first login bootstraps the admin from the two `BOOTSTRAP_ADMIN_*` secrets, then remove those two secrets. Do not commit `.dev.vars`, real IDs, or secrets.
 
