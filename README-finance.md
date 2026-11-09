@@ -6,9 +6,9 @@ The public website remains at `/`. The protected application is at `/staff/`; it
 
 1. Install Node 20+ and authenticate: `npx wrangler login`.
 2. Create resources: `npx wrangler d1 create new-home-finance` and `npx wrangler r2 bucket create new-home-receipts`.
-3. Put the returned D1 ID in `wrangler.toml`, copy `.dev.vars.example` to `.dev.vars`, and set strong unique secrets.
-4. Apply schema: `npm install`, then `npm run db:migrate`.
-5. In Cloudflare Pages, connect the GitHub repository and use **no build command** and output directory `.`. Pages automatically deploys the static site and the `functions/api/[[path]].js` API adapter. Add the D1/R2 bindings and secrets to the Pages project under **Settings → Bindings / Variables and Secrets**.
+3. Copy `.dev.vars.example` to `.dev.vars` for local development and set strong unique secrets. D1 and R2 production bindings are configured in the Cloudflare Pages dashboard, never with resource IDs committed to Git.
+4. Apply schema through the D1 dashboard SQL console (run `migrations/0001_initial.sql` once), or through Wrangler after binding your own D1 database locally.
+5. In Cloudflare Pages, connect the GitHub repository; set **Build command** to `npm install` and output directory to `.`. Pages automatically deploys the static site and the `functions/api/[[path]].js` API adapter. Add the D1/R2 bindings and secrets to the Pages project under **Settings → Bindings / Variables and Secrets**.
 
 The first login bootstraps the admin from the two `BOOTSTRAP_ADMIN_*` secrets, then remove those two secrets. Do not commit `.dev.vars`, real IDs, or secrets.
 
