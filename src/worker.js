@@ -68,7 +68,14 @@ async function createExpense(request, env, user) {
   if (!await assignedProject(env, user.id, projectId)) return fail('المشروع غير متاح لك', 403);
   const amount = money(form.get('amount')), description = String(form.get('description') || '').trim().slice(0, 500), noReceiptReason = String(form.get('no_receipt_reason') || '').trim().slice(0, 300);
   const categoryOk = await env.DB.prepare('SELECT id FROM expense_categories WHERE id=? AND active=1').bind(category).first(); if (!categoryOk) return fail('التصنيف غير صالح');
-  const files = form.getAll('receipts').filter(x => x instanceof File && x.size); if (!files.length && !noReceiptReason) return fail('أرفق إيصالاً أو اذكر سبب عدم توفره'); if (files.length > 4) return fail('الحد الأقصى 4 صور');
+  // If the engineer marks the expense as having no receipt, deliberately
+  // ignore a previously selected file. This keeps the form usable before R2
+  // object storage is enabled and avoids an upload attempt to an absent binding.
+  const uploadedFiles = form.getAll('receipts').filter(x => x instanceof File && x.size);
+  const files = noReceiptReason ? [] : uploadedFiles;
+  if (!files.length && !noReceiptReason) return fail('أرفق إيصالاً أو اذكر سبب عدم توفره');
+  if (files.length && !env.RECEIPTS) return fail('رفع صور الإيصالات غير متاح حاليًا؛ اختر «لا يوجد إيصال» واكتب السبب، أو فعّل تخزين الملفات لاحقًا');
+  if (files.length > 4) return fail('الحد الأقصى 4 صور');
   for (const file of files) if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) return fail('الإيصال يجب أن يكون JPG أو PNG أو WebP وبحجم أقل من 5MB');
   const existing = await env.DB.prepare('SELECT id,public_id FROM expenses WHERE submission_key=?').bind(submissionKey).first(); if (existing) return json({ expense: existing, duplicate: true });
   const expenseId = id(), publicId = `EXP-${Date.now().toString(36).toUpperCase()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36).slice(0,4).toUpperCase()}`;
