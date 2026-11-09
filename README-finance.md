@@ -12,6 +12,20 @@ The public website remains at `/`. The protected application is at `/staff/`; it
 
 The first login bootstraps the admin from the two `BOOTSTRAP_ADMIN_*` secrets, then remove those two secrets. Do not commit `.dev.vars`, real IDs, or secrets.
 
+## إعداد أول حساب أدمن (بالعربي)
+
+لا تكتب أي كلمة مرور في ملف `index.html` أو في GitHub. بعد إنشاء الـWorker، من Cloudflare افتح **Workers & Pages → new-home-finance → Settings → Variables and Secrets** وأضف هذه القيم كـ**Secret**:
+
+| الاسم | القيمة التي تدخلها أنت |
+| --- | --- |
+| `SESSION_SECRET` | نص عشوائي طويل لا يقل عن 32 حرفًا |
+| `BOOTSTRAP_ADMIN_USERNAME` | اسم دخولك، مثل `owner` |
+| `BOOTSTRAP_ADMIN_PASSWORD` | كلمة مرور قوية خاصة بك (12 حرفًا على الأقل) |
+
+بعد نشر الـWorker وفتح `/staff/` لأول مرة، سجل الدخول بالاسم وكلمة المرور اللذين اخترتهما. ينشئ النظام حساب الأدمن مرة واحدة فقط. بعدها احذف سري `BOOTSTRAP_ADMIN_USERNAME` و`BOOTSTRAP_ADMIN_PASSWORD` من Cloudflare، واترك `SESSION_SECRET` فقط. إضافة المهندسين لاحقًا تتم من حساب الأدمن؛ لا تشارك كلمة مرورك معهم.
+
+لا ترسل لي كلمة المرور أو `SESSION_SECRET` في المحادثة.
+
 ## Recovery
 
 Use scheduled D1 exports/backups and R2 object versioning/retention. Financial records are never deleted: voids, rejections, and cancellations preserve the original record and audit history.

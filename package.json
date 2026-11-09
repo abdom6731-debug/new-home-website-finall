@@ -8,6 +8,10 @@
     "db:migrate": "wrangler d1 migrations apply new-home-finance --remote",
     "check": "wrangler deploy --dry-run"
   },
-  "dependencies": { "xlsx": "^0.18.5" },
-  "devDependencies": { "wrangler": "^4.0.0" }
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "wrangler": "^4.158.0"
+  }
 }
