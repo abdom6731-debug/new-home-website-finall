@@ -2,3 +2,8 @@ name = "new-home-eg"
 compatibility_date = "2025-04-01"
 pages_build_output_dir = "."
 compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "new-home-finance"
+database_id = "d0398dcc-9735-40e2-af64-dc0b5c65033b"
