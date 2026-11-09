@@ -84,7 +84,13 @@ async function decideExpense(request, env, admin, expenseId) {
   else if(action==='return' && e.status==='pending' && note) { await env.DB.batch([env.DB.prepare("UPDATE expenses SET status='returned',decided_at=?,decided_by=?,decision_note=? WHERE id=?").bind(now(),admin.id,note,e.id),env.DB.prepare('INSERT INTO expense_history (id,expense_id,from_status,to_status,note,actor_id) VALUES (?,?,?,?,?,?)').bind(id(),e.id,'pending','returned',note,admin.id)]); }
   else return fail('الإجراء أو الحالة غير صالحين'); await audit(env,admin.id,`expense_${action}`,'expense',e.id,{note}); return json({ok:true});
 }
-async function csvReport(env) { const rows=await env.DB.prepare(`SELECT e.public_id,e.submitted_at,u.display_name engineer,p.name project,c.name category,e.description,e.amount_piastres,e.status,e.decided_at FROM expenses e JOIN users u ON u.id=e.engineer_id JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id ORDER BY e.submitted_at DESC`).all(); const cols=['Expense ID','Date','Engineer','Project','Category','Description','Amount EGP','Status','Decision Date']; const esc=x=>`"${String(x??'').replaceAll('"','""')}"`; const text='\uFEFF'+[cols,...rows.results.map(r=>[r.public_id,r.submitted_at,r.engineer,r.project,r.category,r.description,(r.amount_piastres/100).toFixed(2),r.status,r.decided_at])].map(r=>r.map(esc).join(',')).join('\n'); return new Response(text,{headers:{'content-type':'text/csv; charset=utf-8','content-disposition':'attachment; filename="new-home-expenses.csv"'}}); }
+async function csvReport(env) {
+  const result = await env.DB.prepare('SELECT public_id, submitted_at, amount_piastres, status FROM expenses ORDER BY submitted_at DESC').all();
+  const escapeCsv = value => '"' + String(value === null || value === undefined ? '' : value).split('"').join('""') + '"';
+  const lines = [['Expense ID','Date','Amount EGP','Status']];
+  for (const row of result.results) lines.push([row.public_id, row.submitted_at, (Number(row.amount_piastres) / 100).toFixed(2), row.status]);
+  return new Response('\uFEFF' + lines.map(row => row.map(escapeCsv).join(',')).join('\r\n'), { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="new-home-expenses.csv"', 'cache-control': 'no-store' } });
+}
 // CSV opens directly in Excel. Avoid a heavyweight XLSX library, which can
 // exceed Pages Functions runtime limits and cause Cloudflare Error 1101.
 async function xlsxReport(env) { return csvReport(env); }
