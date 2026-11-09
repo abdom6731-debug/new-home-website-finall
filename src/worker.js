@@ -84,10 +84,26 @@ async function decideExpense(request, env, admin, expenseId) {
   else if(action==='return' && e.status==='pending' && note) { await env.DB.batch([env.DB.prepare("UPDATE expenses SET status='returned',decided_at=?,decided_by=?,decision_note=? WHERE id=?").bind(now(),admin.id,note,e.id),env.DB.prepare('INSERT INTO expense_history (id,expense_id,from_status,to_status,note,actor_id) VALUES (?,?,?,?,?,?)').bind(id(),e.id,'pending','returned',note,admin.id)]); }
   else return fail('الإجراء أو الحالة غير صالحين'); await audit(env,admin.id,`expense_${action}`,'expense',e.id,{note}); return json({ok:true});
 }
-async function csvReport() {
-  // Baseline export. Kept independent from D1 while the Pages D1 report issue
-  // is isolated; it proves the download endpoint and Excel workflow work.
-  return new Response('\uFEFF"Expense ID","Date","Amount EGP","Status"\r\n', { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="new-home-expenses.csv"', 'cache-control': 'no-store' } });
+async function csvReport(env) {
+  const [clients, projects, engineers, payments, advances, expenses] = await Promise.all([
+    env.DB.prepare('SELECT id,name,phone,email,created_at FROM clients WHERE archived_at IS NULL ORDER BY created_at DESC').all(),
+    env.DB.prepare('SELECT id,name,address,contract_piastres,status,created_at FROM projects WHERE archived_at IS NULL ORDER BY created_at DESC').all(),
+    env.DB.prepare("SELECT id,display_name,username,created_at FROM users WHERE role='engineer' ORDER BY created_at DESC").all(),
+    env.DB.prepare('SELECT id,project_id,amount_piastres,paid_on,reference,notes,created_at FROM client_payments WHERE voided_at IS NULL ORDER BY created_at DESC').all(),
+    env.DB.prepare('SELECT id,engineer_id,amount_piastres,kind,occurred_on,notes,created_at FROM advances WHERE voided_at IS NULL ORDER BY created_at DESC').all(),
+    env.DB.prepare('SELECT public_id,engineer_id,project_id,category_id,amount_piastres,description,status,submitted_at,decided_at FROM expenses ORDER BY submitted_at DESC').all()
+  ]);
+  const rows = [['Type','ID','Name / Description','Related ID','Amount EGP','Status / Category','Date','Notes']];
+  const add = (type, id, name, related, amount, status, date, notes) => rows.push([type,id,name,related,amount,status,date,notes]);
+  clients.results.forEach(x => add('Client',x.id,x.name,x.phone,'','',x.created_at,x.email));
+  projects.results.forEach(x => add('Project',x.id,x.name,x.address,(Number(x.contract_piastres)/100).toFixed(2),x.status,x.created_at,''));
+  engineers.results.forEach(x => add('Engineer',x.id,x.display_name,x.username,'','',x.created_at,''));
+  payments.results.forEach(x => add('Client payment',x.id,'',x.project_id,(Number(x.amount_piastres)/100).toFixed(2),'received',x.paid_on,[x.reference,x.notes].filter(Boolean).join(' | ')));
+  advances.results.forEach(x => add(x.kind==='return'?'Cash returned':'Cash advance',x.id,'',x.engineer_id,(Number(x.amount_piastres)/100).toFixed(2),x.kind,x.occurred_on,x.notes));
+  expenses.results.forEach(x => add('Expense',x.public_id,x.description,x.project_id,(Number(x.amount_piastres)/100).toFixed(2),`${x.status} / ${x.category_id}`,x.submitted_at,x.engineer_id));
+  const escapeCsv = value => '"' + String(value === null || value === undefined ? '' : value).split('"').join('""') + '"';
+  const content = '\uFEFF' + rows.map(row => row.map(escapeCsv).join(',')).join('\r\n');
+  return new Response(content, { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="new-home-financial-report.csv"', 'cache-control': 'no-store' } });
 }
 // CSV opens directly in Excel. Avoid a heavyweight XLSX library, which can
 // exceed Pages Functions runtime limits and cause Cloudflare Error 1101.
