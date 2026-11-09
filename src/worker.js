@@ -112,7 +112,7 @@ async function reportData(env) {
     env.DB.prepare("SELECT id,display_name,username,created_at FROM users WHERE role='engineer' ORDER BY created_at DESC").all(),
     env.DB.prepare(`SELECT cp.id,p.name project_name,cp.amount_piastres,cp.paid_on,cp.reference,cp.notes FROM client_payments cp JOIN projects p ON p.id=cp.project_id WHERE cp.voided_at IS NULL ORDER BY cp.paid_on DESC`).all(),
     env.DB.prepare(`SELECT a.id,u.display_name engineer_name,a.kind,a.amount_piastres,a.occurred_on,a.notes FROM advances a JOIN users u ON u.id=a.engineer_id WHERE a.voided_at IS NULL ORDER BY a.occurred_on DESC`).all(),
-    env.DB.prepare(`SELECT e.public_id,u.display_name engineer_name,p.name project_name,c.name category,e.description,e.amount_piastres,e.status,e.submitted_at,e.decided_at FROM expenses e JOIN users u ON u.id=e.engineer_id JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id ORDER BY e.submitted_at DESC`).all()
+    env.DB.prepare(`SELECT e.public_id,u.display_name engineer_name,p.name project_name,c.name_ar category,e.description,e.amount_piastres,e.status,e.submitted_at,e.decided_at FROM expenses e JOIN users u ON u.id=e.engineer_id JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id ORDER BY e.submitted_at DESC`).all()
   ]);
   return { generated_at: now(), clients: clients.results, projects: projects.results, engineers: engineers.results, payments: payments.results, advances: advances.results, expenses: expenses.results };
 }
