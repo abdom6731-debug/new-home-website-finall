@@ -84,12 +84,10 @@ async function decideExpense(request, env, admin, expenseId) {
   else if(action==='return' && e.status==='pending' && note) { await env.DB.batch([env.DB.prepare("UPDATE expenses SET status='returned',decided_at=?,decided_by=?,decision_note=? WHERE id=?").bind(now(),admin.id,note,e.id),env.DB.prepare('INSERT INTO expense_history (id,expense_id,from_status,to_status,note,actor_id) VALUES (?,?,?,?,?,?)').bind(id(),e.id,'pending','returned',note,admin.id)]); }
   else return fail('الإجراء أو الحالة غير صالحين'); await audit(env,admin.id,`expense_${action}`,'expense',e.id,{note}); return json({ok:true});
 }
-async function csvReport(env) {
-  const result = await env.DB.prepare('SELECT public_id, submitted_at, amount_piastres, status FROM expenses ORDER BY submitted_at DESC').all();
-  const escapeCsv = value => '"' + String(value === null || value === undefined ? '' : value).split('"').join('""') + '"';
-  const lines = [['Expense ID','Date','Amount EGP','Status']];
-  for (const row of result.results) lines.push([row.public_id, row.submitted_at, (Number(row.amount_piastres) / 100).toFixed(2), row.status]);
-  return new Response('\uFEFF' + lines.map(row => row.map(escapeCsv).join(',')).join('\r\n'), { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="new-home-expenses.csv"', 'cache-control': 'no-store' } });
+async function csvReport() {
+  // Baseline export. Kept independent from D1 while the Pages D1 report issue
+  // is isolated; it proves the download endpoint and Excel workflow work.
+  return new Response('\uFEFF"Expense ID","Date","Amount EGP","Status"\r\n', { headers: { 'content-type': 'text/csv; charset=utf-8', 'content-disposition': 'attachment; filename="new-home-expenses.csv"', 'cache-control': 'no-store' } });
 }
 // CSV opens directly in Excel. Avoid a heavyweight XLSX library, which can
 // exceed Pages Functions runtime limits and cause Cloudflare Error 1101.
