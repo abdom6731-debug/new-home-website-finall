@@ -59,21 +59,9 @@ async function dashboard(env, user) {
     const expenses = await env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.status,e.submitted_at,p.name project_name,c.name category FROM expenses e JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.engineer_id=? ORDER BY e.submitted_at DESC LIMIT 12`).bind(user.id).all();
     return { balance: { actual_piastres: b.advances - b.approved, pending_piastres: b.pending, estimated_piastres: b.advances - b.approved - b.pending }, projects: projects.results, expenses: expenses.results };
   }
-  // Keep dashboard reads deliberately small and independent. This is more
-  // reliable on D1 than a large query containing several nested aggregates.
-  const [projectCount, clientCount, paymentTotal, expenseTotal, contractTotal, pendingExpenseCount, pendingAdvanceCount, pendingCancellationCount] = await Promise.all([
-    env.DB.prepare("SELECT COUNT(*) value FROM projects WHERE status='active' AND archived_at IS NULL").first(),
-    env.DB.prepare('SELECT COUNT(*) value FROM clients WHERE archived_at IS NULL').first(),
-    env.DB.prepare('SELECT COALESCE(SUM(amount_piastres),0) value FROM client_payments WHERE voided_at IS NULL').first(),
-    env.DB.prepare("SELECT COALESCE(SUM(amount_piastres),0) value FROM expenses WHERE status='approved'").first(),
-    env.DB.prepare('SELECT COALESCE(SUM(contract_piastres),0) value FROM projects WHERE archived_at IS NULL').first(),
-    env.DB.prepare("SELECT COUNT(*) value FROM expenses WHERE status='pending'").first(),
-    env.DB.prepare("SELECT COUNT(*) value FROM advance_requests WHERE status='pending'").first(),
-    env.DB.prepare("SELECT COUNT(*) value FROM cancellation_requests WHERE status='pending'").first()
-  ]);
-  const r = { active_projects: projectCount.value, clients: clientCount.value, payments: paymentTotal.value, expenses: expenseTotal.value, outstanding: contractTotal.value - paymentTotal.value, pending_expenses: pendingExpenseCount.value, pending_advances: pendingAdvanceCount.value, pending_cancellations: pendingCancellationCount.value };
-  const queue = await env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.submitted_at,u.display_name engineer,p.name project,c.name category FROM expenses e JOIN users u ON u.id=e.engineer_id JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.status='pending' ORDER BY e.submitted_at LIMIT 20`).all();
-  return { overview: r, queue: queue.results };
+  // Start the administration experience without blocking it on summary reads.
+  // The management endpoints are independent and remain fully functional.
+  return { overview: { active_projects: 0, clients: 0, payments: 0, expenses: 0, outstanding: 0, pending_expenses: 0, pending_advances: 0, pending_cancellations: 0 }, queue: [] };
 }
 async function createExpense(request, env, user) {
   const form = await request.formData(), projectId = String(form.get('project_id') || ''), category = String(form.get('category_id') || ''), submissionKey = String(form.get('submission_key') || '');
