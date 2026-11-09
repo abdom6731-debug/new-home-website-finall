@@ -58,9 +58,19 @@ async function dashboard(env, user) {
     const expenses = await env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.status,e.submitted_at,p.name project_name,c.name_ar category FROM expenses e JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.engineer_id=? ORDER BY e.submitted_at DESC LIMIT 12`).bind(user.id).all();
     return { balance: { actual_piastres: b.advances - b.approved, pending_piastres: b.pending, estimated_piastres: b.advances - b.approved - b.pending }, projects: projects.results, expenses: expenses.results };
   }
-  // Start the administration experience without blocking it on summary reads.
-  // The management endpoints are independent and remain fully functional.
-  return { overview: { active_projects: 0, clients: 0, payments: 0, expenses: 0, outstanding: 0, pending_expenses: 0, pending_advances: 0, pending_cancellations: 0 }, queue: [] };
+  const scalar = async (sql) => Number((await env.DB.prepare(sql).first()).value || 0);
+  const [activeProjects, clientCount, payments, approvedExpenses, contracts, pendingExpenses, pendingAdvances, pendingCancellations, queue] = await Promise.all([
+    scalar("SELECT COUNT(*) value FROM projects WHERE status='active' AND archived_at IS NULL"),
+    scalar('SELECT COUNT(*) value FROM clients WHERE archived_at IS NULL'),
+    scalar('SELECT COALESCE(SUM(amount_piastres),0) value FROM client_payments WHERE voided_at IS NULL'),
+    scalar("SELECT COALESCE(SUM(amount_piastres),0) value FROM expenses WHERE status='approved'"),
+    scalar('SELECT COALESCE(SUM(contract_piastres),0) value FROM projects WHERE archived_at IS NULL'),
+    scalar("SELECT COUNT(*) value FROM expenses WHERE status='pending'"),
+    scalar("SELECT COUNT(*) value FROM advance_requests WHERE status='pending'"),
+    scalar("SELECT COUNT(*) value FROM cancellation_requests WHERE status='pending'"),
+    env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.submitted_at,u.display_name engineer,p.name project,c.name_ar category FROM expenses e JOIN users u ON u.id=e.engineer_id JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.status='pending' ORDER BY e.submitted_at ASC LIMIT 50`).all()
+  ]);
+  return { overview: { active_projects: activeProjects, clients: clientCount, payments, expenses: approvedExpenses, outstanding: Math.max(0, contracts - payments), pending_expenses: pendingExpenses, pending_advances: pendingAdvances, pending_cancellations: pendingCancellations }, queue: queue.results };
 }
 async function createExpense(request, env, user) {
   const form = await request.formData(), projectId = String(form.get('project_id') || ''), category = String(form.get('category_id') || ''), submissionKey = String(form.get('submission_key') || '');
