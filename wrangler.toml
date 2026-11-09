@@ -1,0 +1,15 @@
+name = "new-home-finance"
+main = "src/worker.js"
+compatibility_date = "2025-04-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "new-home-finance"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[r2_buckets]]
+binding = "RECEIPTS"
+bucket_name = "new-home-receipts"
+
+[vars]
+APP_ORIGIN = "https://REPLACE_WITH_YOUR_DOMAIN"
