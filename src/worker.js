@@ -12,7 +12,7 @@ const nonnegativeMoney = value => { const n=Number(value); if(!Number.isFinite(n
 const digest = async value => [...new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(value)))].map(x => x.toString(16).padStart(2, '0')).join('');
 // Kept below the Pages Functions CPU budget; the login throttle further limits
 // password guesses. Store the work factor with each hash for future upgrades.
-const PBKDF2_ITERATIONS = 100000;
+const PBKDF2_ITERATIONS = 10000;
 async function passwordHash(password, salt = crypto.getRandomValues(new Uint8Array(16)), iterations = PBKDF2_ITERATIONS) {
   const key = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
   const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations }, key, 256);
