@@ -55,7 +55,7 @@ async function balances(env, engineerId) {
 async function dashboard(env, user) {
   if (user.role === 'engineer') {
     const b = await balances(env, user.id); const projects = await env.DB.prepare(`SELECT p.id,p.name,p.status FROM projects p JOIN project_assignments a ON a.project_id=p.id WHERE a.engineer_id=? AND a.unassigned_at IS NULL AND p.archived_at IS NULL`).bind(user.id).all();
-    const expenses = await env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.status,e.submitted_at,p.name project_name,c.name_ar category FROM expenses e JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.engineer_id=? ORDER BY e.submitted_at DESC LIMIT 12`).bind(user.id).all();
+    const expenses = await env.DB.prepare(`SELECT e.id,e.public_id,e.amount_piastres,e.status,e.submitted_at,e.decided_at,e.decision_note,p.name project_name,c.name_ar category FROM expenses e JOIN projects p ON p.id=e.project_id JOIN expense_categories c ON c.id=e.category_id WHERE e.engineer_id=? ORDER BY e.submitted_at DESC LIMIT 30`).bind(user.id).all();
     return { balance: { actual_piastres: b.advances - b.approved, pending_piastres: b.pending, estimated_piastres: b.advances - b.approved - b.pending }, projects: projects.results, expenses: expenses.results };
   }
   const scalar = async (sql) => Number((await env.DB.prepare(sql).first()).value || 0);
